@@ -6,7 +6,7 @@ namespace Resto_Backend.Data
 {
     public class UserRepository
     {
-        private readonly IConfiguration _configuration;
+        public readonly IConfiguration _configuration;
         public UserRepository(IConfiguration configuration)
         {
             this._configuration = configuration;
@@ -45,6 +45,35 @@ namespace Resto_Backend.Data
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
                 sqlCommand.Parameters.AddWithValue("@UserID", userID);
+                sqlConnection.Open();
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+                if (reader.Read())
+                {
+                    user = new UserModel
+                    {
+                        UserID = Convert.ToInt32(reader["UserID"]),
+                        UserName = reader["UserName"].ToString(),
+                        Password = reader["Password"].ToString(),
+                        Email = reader["Email"].ToString(),
+                        MobileNumber = reader["MobileNumber"].ToString(),
+                        Address = reader["Address"].ToString(),
+                        ProfileImage = reader["ProfileImage"].ToString(),
+                        IsAdmin = Convert.ToInt32(reader["IsAdmin"]),
+                    };
+                }
+                return user;
+            }
+        }
+        public UserModel SelectUserByUserName(string userName)
+        {
+            UserModel user = null;
+            using (SqlConnection sqlConnection = new SqlConnection(this._configuration.GetConnectionString("ConnectionString")))
+            {
+                SqlCommand sqlCommand = new SqlCommand("PR_User_SelectByUserName", sqlConnection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                sqlCommand.Parameters.AddWithValue("@UserName", userName);
                 sqlConnection.Open();
                 SqlDataReader reader = sqlCommand.ExecuteReader();
                 if (reader.Read())
