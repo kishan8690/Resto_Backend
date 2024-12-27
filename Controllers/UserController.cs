@@ -16,29 +16,29 @@ namespace Resto_Backend.Controllers
     {
         private readonly UserRepository userRepository;
 
-        public UserController(UserRepository userRepository) 
+        public UserController(UserRepository userRepository)
         {
             this.userRepository = userRepository;
         }
         [HttpPost]
         [Route("Register")]
-
+        #region Register User
         public async Task<IActionResult> RegisterUser([FromBody] UserModel user)
         {
             if (user == null)
             {
                 return BadRequest();
             }
-            bool isRegister=await userRepository.Register(user);
+            bool isRegister = await userRepository.Register(user);
             if (isRegister)
             {
                 return Ok(new { Message = "User is Register SuccessFully !" });
             }
             return StatusCode(500, "An Error occurred while Registering");
         }
-       
+        #endregion
         [HttpGet("{id}")]
-      
+        #region Get User
         public async Task<IActionResult> GetUser(int userID)
         {
             var user = userRepository.SelectUserByPk(userID);
@@ -48,9 +48,11 @@ namespace Resto_Backend.Controllers
             }
             return Ok(user);
         }
+        #endregion
 
         [HttpPost]
         [Route("Login")]
+        #region Login
         public IActionResult Login([FromBody] LoginModel loginModel)
         {
             Console.WriteLine("User name=" + loginModel.UserName);
@@ -91,5 +93,7 @@ namespace Resto_Backend.Controllers
             //}
             //return NoContent();
         }
+        #endregion
+        
     }
 }

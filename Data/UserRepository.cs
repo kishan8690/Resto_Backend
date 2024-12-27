@@ -102,9 +102,8 @@ namespace Resto_Backend.Data
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
                 sqlCommand.Parameters.AddWithValue("@UserID", UserID);
-
-
-
+                string hashPassword = PasswordIncryptDecrypt.ConvertToEncrypt(NewPassword);
+                sqlCommand.Parameters.AddWithValue("@Password", hashPassword);
                 conn.Open();
                 int rowAffected = sqlCommand.ExecuteNonQuery();
 
