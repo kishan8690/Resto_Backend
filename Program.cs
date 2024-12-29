@@ -19,6 +19,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UserRepository>();
 builder.Services.AddScoped<CategoryRepository>();
+builder.Services.AddScoped<ChefReposetory>();
 var app = builder.Build();
 
 //JWT Services
