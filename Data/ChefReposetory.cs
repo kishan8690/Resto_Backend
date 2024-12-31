@@ -63,7 +63,7 @@ namespace Resto_Backend.Data
                 conn.Open();
                 int rowAffected = sqlCommand.ExecuteNonQuery();
                 return rowAffected > 0;
-            }
+            }   
         }
         public async Task<bool> UpdateChef(ChefModel chef)
         {
