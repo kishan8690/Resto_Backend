@@ -15,9 +15,12 @@ namespace Resto_Backend.Controllers
     public class UserController : ControllerBase
     {
         private readonly UserRepository userRepository;
-
-        public UserController(UserRepository userRepository)
+        private readonly IAuthRepository _authRepository;
+        private readonly TokenService _tokenService;
+        public UserController(UserRepository userRepository, IAuthRepository authRepository, TokenService tokenService)
         {
+            _authRepository = authRepository;
+            _tokenService = tokenService;
             this.userRepository = userRepository;
         }
         [HttpPost]
@@ -51,49 +54,25 @@ namespace Resto_Backend.Controllers
         #endregion
 
         [HttpPost]
-        [Route("Login")]
-        #region Login
-        public IActionResult Login([FromBody] LoginModel loginModel)
+
+        [HttpPost("Login")]
+        public async Task<IActionResult> Login([FromBody] LoginModel model)
         {
-            Console.WriteLine("User name=" + loginModel.UserName);
-            Console.WriteLine("Password=" + loginModel.Password);
-            var user = userRepository.SelectUserByUserName(loginModel.UserName);
-            if (user == null)
+            if (model == null || string.IsNullOrEmpty(model.UserName) || string.IsNullOrEmpty(model.Password))
+                return BadRequest("Invalid request!");
+
+            var isValidUser = await _authRepository.ValidateUser(model.UserName, model.Password);
+
+            if (isValidUser)
             {
-                return NotFound();
+                string token = _tokenService.GenerateToken(model.UserName);
+                return Ok(new { Token = token });
             }
-            Console.WriteLine("after User name=" + user.UserName);
-            Console.WriteLine("after Password=" + user.Password);
-            //bool isValidUser = PasswordIncryptDecrypt.ConvertToDecrypt(loginModel.Password, user.Password);
-            //if (!isValidUser)
-            //{
-            //    return NotFound("Incorrect Password or User Name");
-            //}
-
-
-            return Ok(loginModel);
-            //if(user != null)
-            //{
-            //    var chaims = new[]
-            //    {
-            //        new Claim(JwtRegisteredClaimNames.Sub,userRepository._configuration["Jwt:Subject"]),
-            //        new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            //        new Claim("UserID",user.UserID.ToString()),
-            //        new Claim("UserName",user.UserName.ToString()),
-            //    };
-            //    var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(userRepository._configuration["Jwt:Key"]));
-            //    var signIn = new SigningCredentials(key,SecurityAlgorithms.HmacSha256);
-            //    var token = new JwtSecurityToken(userRepository._configuration["Jwt:Issuer"]
-            //        , userRepository._configuration["Jwt:Audience"]
-            //        ,chaims,expires:DateTime.UtcNow.AddMinutes(60),
-            //        signingCredentials:signIn
-            //        );
-            //    string tokenValue  = new JwtSecurityTokenHandler().WriteToken(token);
-            //    return Ok(new {Token = tokenValue,User = user});
-            //}
-            //return NoContent();
+            else
+            {
+                return Unauthorized("Invalid Email or Password!");
+            }
         }
-        #endregion
-        
+
     }
 }
