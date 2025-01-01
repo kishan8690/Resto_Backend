@@ -60,10 +60,14 @@ namespace Resto_Backend.Controllers
         {
             if (model == null || string.IsNullOrEmpty(model.UserName) || string.IsNullOrEmpty(model.Password))
                 return BadRequest("Invalid request!");
-
-            var isValidUser = await _authRepository.ValidateUser(model.UserName, model.Password);
-
-            if (isValidUser)
+            var user  = userRepository.SelectUserByUserName(model.UserName);
+            if (user == null)
+            {
+                return NotFound("User Not Found With Username");
+            }
+            string password = PasswordIncryptDecrypt.ConvertToDecrypt(user.Password);
+            //Console.WriteLine("password-" + password);
+            if (model.Password.Equals(password))
             {
                 string token = _tokenService.GenerateToken(model.UserName);
                 return Ok(new { Token = token });
@@ -71,7 +75,7 @@ namespace Resto_Backend.Controllers
             else
             {
                 return Unauthorized("Invalid Email or Password!");
-            }
+            }    
         }
 
     }
