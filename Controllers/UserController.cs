@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Resto_Backend.Data;
+using Resto_Backend.Middleware;
 using Resto_Backend.Model;
 using Resto_Backend.Utils;
 using System.IdentityModel.Tokens.Jwt;
@@ -60,23 +61,40 @@ namespace Resto_Backend.Controllers
         {
             if (model == null || string.IsNullOrEmpty(model.UserName) || string.IsNullOrEmpty(model.Password))
                 return BadRequest("Invalid request!");
-            var user  = userRepository.SelectUserByUserName(model.UserName);
+            var user = userRepository.SelectUserByUserName(model.UserName);
             if (user == null)
             {
                 return NotFound("User Not Found With Username");
             }
-            string password = PasswordIncryptDecrypt.ConvertToDecrypt(user.Password);
-            //Console.WriteLine("password-" + password);
-            if (model.Password.Equals(password))
-            {
-                string token = _tokenService.GenerateToken(model.UserName);
-                return Ok(new { Token = token });
-            }
-            else
-            {
-                return Unauthorized("Invalid Email or Password!");
-            }    
-        }
 
+            try
+            {
+                string password = PasswordIncryptDecrypt.ConvertToDecrypt(user.Password);
+                if (model.Password.Equals(password))
+                {
+                    string token = _tokenService.GenerateToken(model.UserName);
+
+                    // Set token in HTTP-only cookie
+                    HttpContext.Response.Cookies.Append("AuthToken", token, new CookieOptions
+                    {
+                        HttpOnly = true, // Prevents JavaScript from accessing the cookie
+                        Secure = true,   // Ensures the cookie is sent only over HTTPS
+                        SameSite = SameSiteMode.Strict, // Prevents cross-site request forgery (CSRF)
+                        Expires = DateTime.UtcNow.AddHours(1) // Set cookie expiration
+                    });
+
+                    return Ok(new { Message = "Login successful!",Token = token  });
+                }
+                else
+                {
+                    return Unauthorized("Invalid Username or Password!");
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
     }
 }

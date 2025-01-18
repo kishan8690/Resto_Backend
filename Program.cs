@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using Resto_Backend.Data;
+using Resto_Backend.Middleware;
 using Resto_Backend.Utils;
 using System.Reflection;
 using System.Text;
@@ -25,7 +26,6 @@ builder.Services.AddSingleton<TokenService>();
 builder.Services.AddScoped<CategoryRepository>();
 builder.Services.AddScoped<ChefReposetory>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
-
 
 //JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -53,7 +53,6 @@ if (app.Environment.IsDevelopment())
 }
 app.UseAuthentication();
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 
 app.MapControllers();
