@@ -19,22 +19,26 @@ namespace Resto_Backend.Data
                 {
                     CommandType = System.Data.CommandType.StoredProcedure
                 };
+
                 sqlCommand.Parameters.AddWithValue("@Username", user.UserName);
                 string hashPassword = PasswordIncryptDecrypt.ConvertToEncrypt(user.Password);
                 sqlCommand.Parameters.AddWithValue("@Password", hashPassword);
                 sqlCommand.Parameters.AddWithValue("@Email", user.Email);
                 sqlCommand.Parameters.AddWithValue("@MobileNumber", user.MobileNumber);
                 sqlCommand.Parameters.AddWithValue("@Address", user.Address);
+
+                // Upload Profile Image to Cloudinary
                 CloudinaryService cloudinaryService = new CloudinaryService(this._configuration);
                 string url = await cloudinaryService.UploadFileAsync(user.ProfileImage);
-                Console.WriteLine(url);
                 sqlCommand.Parameters.AddWithValue("@ProfileImage", url);
+
                 conn.Open();
                 int rowAffected = sqlCommand.ExecuteNonQuery();
 
                 return rowAffected > 0;
             }
         }
+
         public UserModel SelectUserByPk(int userID)
         {
             UserModel user = null;
@@ -57,7 +61,7 @@ namespace Resto_Backend.Data
                         Email = reader["Email"].ToString(),
                         MobileNumber = reader["MobileNumber"].ToString(),
                         Address = reader["Address"].ToString(),
-                        ProfileImage = reader["ProfileImage"].ToString(),
+                        ProfileImageUrl = reader["ProfileImage"].ToString(),
                         IsAdmin = Convert.ToInt32(reader["IsAdmin"]),
                     };
                 }
@@ -86,7 +90,7 @@ namespace Resto_Backend.Data
                         Email = reader["Email"].ToString(),
                         MobileNumber = reader["MobileNumber"].ToString(),
                         Address = reader["Address"].ToString(),
-                        ProfileImage = reader["ProfileImage"].ToString(),
+                        ProfileImageUrl = reader["ProfileImage"].ToString(),
                         IsAdmin = Convert.ToInt32(reader["IsAdmin"]),
                     };
                 }

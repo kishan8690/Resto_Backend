@@ -1,74 +1,71 @@
-﻿using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Microsoft.IdentityModel.Tokens;
-using Resto_Backend.Data;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
+﻿//using Microsoft.AspNetCore.Mvc.Infrastructure;
+//using Microsoft.IdentityModel.Tokens;
+//using Resto_Backend.Data;
+//using System.IdentityModel.Tokens.Jwt;
+//using System.Security.Claims;
+//using System.Text;
 
-namespace Resto_Backend.Middleware
-{
-    public class AuthMiddleware
-    {
-        private readonly RequestDelegate _next;
-        private readonly IConfiguration _configuration;
-        private readonly UserRepository _userRepository;
-        public AuthMiddleware(RequestDelegate next, IConfiguration configuration,UserRepository userRepository)
-        {
-            _next = next;
-            _configuration = configuration;
-            _userRepository = userRepository;
-        }
-        public async Task InvokeAsync(HttpContext context)
-        {
-            var token = context.Request.Cookies["AuthToken"] ?? context.Request.Headers["Authorization"].FirstOrDefault()?.Replace("Bearer ", "");
-            if (string.IsNullOrEmpty(token))
-            {
-                context.Response.StatusCode = 401;
-                await context.Response.WriteAsync("Unauthorize request - No token provided");
-                return;
-            }
-            try
-            {
-                var tokenHandle = new JwtSecurityTokenHandler();
-                var jwtSettings = _configuration.GetSection("Jwt");
-                var key = Encoding.UTF8.GetBytes(jwtSettings["Key"]);
-                var validationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false,
-                    ClockSkew = TimeSpan.Zero
-                };
-                var principal = tokenHandle.ValidateToken(token, validationParameters, out var validatedToken);
-                if (validatedToken is JwtSecurityToken jwtToken &&
-                jwtToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    var userId = principal.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value;
-                    if (string.IsNullOrEmpty(userId))
-                    {
-                        context.Response.StatusCode = 401; // Unauthorized
-                        await context.Response.WriteAsync("Invalid Access Token - No User ID found");
-                        return;
-                    }
-                    var User = _userRepository.SelectUserByPk(Convert.ToInt32(userId));
-                    if (User == null)
-                    {
-                        context.Response.StatusCode = 401;
-                        await context.Response.WriteAsync("No User Found");
-                    }
-                    context.Items["User"] = User;
-                    Console.WriteLine("---------------------------");
-                    Console.WriteLine("User Name" + User.UserName);
-                }
-            }
-            catch (Exception ex)
-            {
-                context.Response.StatusCode = 401; // Unauthorized
-                await context.Response.WriteAsync($"Unauthorized: {ex.Message}");
-                return;
-            }
-            await _next(context);
-        }
-    }
-}
+//namespace Resto_Backend.Middleware
+//{
+//    public class AuthMiddleware
+//    {
+//        private readonly RequestDelegate _next;
+//        private readonly string _secretKey;
+//        private readonly string _validIssuer;
+//        private readonly string _validAudience;
+
+//        public AuthMiddleware(RequestDelegate next, string secretKey, string validIssuer, string validAudience)
+//        {
+//            _next = next;
+//            _secretKey = secretKey;
+//            _validIssuer = validIssuer;
+//            _validAudience = validAudience;
+//        }
+
+        
+//            public async Task InvokeAsync(HttpContext context)
+//            {
+//                var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+
+//                if (token != null)
+//                {
+//                    try
+//                    {
+//                        var key = _configuration["Jwt:Key"];
+//                        var issuer = _configuration["Jwt:Issuer"];
+//                        var audience = _configuration["Jwt:Audience"];
+
+//                        var tokenHandler = new JwtSecurityTokenHandler();
+//                        var tokenValidationParameters = new TokenValidationParameters
+//                        {
+//                            ValidateIssuer = true,
+//                            ValidIssuer = issuer,
+
+//                            ValidateAudience = true,
+//                            ValidAudience = audience,
+
+//                            ValidateIssuerSigningKey = true,
+//                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+
+//                            ValidateLifetime = true,
+//                            ClockSkew = TimeSpan.Zero
+//                        };
+
+//                        ClaimsPrincipal principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
+
+//                        context.User = principal; // Attach the user to the context
+//                    }
+//                    catch (Exception ex)
+//                    {
+//                        Console.WriteLine($"Token validation failed: {ex.Message}");
+//                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+//                        await context.Response.WriteAsync("Invalid Token");
+//                        return;
+//                    }
+//                }
+
+//                await _next(context);
+//            }
+//        }
+//    }
+

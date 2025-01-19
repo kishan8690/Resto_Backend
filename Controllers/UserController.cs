@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using Resto_Backend.Data;
-using Resto_Backend.Middleware;
+//using Resto_Backend.Middleware;
 using Resto_Backend.Model;
 using Resto_Backend.Utils;
 using System.IdentityModel.Tokens.Jwt;
@@ -24,28 +25,43 @@ namespace Resto_Backend.Controllers
             _tokenService = tokenService;
             this.userRepository = userRepository;
         }
-        [HttpPost]
-        [Route("Register")]
+
+
         #region Register User
-        public async Task<IActionResult> RegisterUser([FromBody] UserModel user)
+        [HttpPost("Register")]
+        public async Task<IActionResult> RegisterUser([FromForm] UserModel user)
         {
-            if (user == null)
+            try
             {
-                return BadRequest();
+                if (user == null || user.ProfileImage == null)
+                {
+                    return BadRequest("User model or image is missing.");
+                }
+
+                bool isRegister = await userRepository.Register(user);
+                if (isRegister)
+                {
+                    return Ok(new { Message = "User registered successfully!" });
+                }
+
+                return StatusCode(500, "An error occurred while registering the user.");
             }
-            bool isRegister = await userRepository.Register(user);
-            if (isRegister)
+            catch (Exception ex)
             {
-                return Ok(new { Message = "User is Register SuccessFully !" });
+                // Log the exception (for example, use Serilog, NLog, or Console.WriteLine)
+                Console.WriteLine($"Error: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
             }
-            return StatusCode(500, "An Error occurred while Registering");
         }
+
+
         #endregion
         [HttpGet("{id}")]
         #region Get User
         public async Task<IActionResult> GetUser(int userID)
         {
             var user = userRepository.SelectUserByPk(userID);
+            Console.WriteLine(user);
             if (user == null)
             {
                 return NotFound();

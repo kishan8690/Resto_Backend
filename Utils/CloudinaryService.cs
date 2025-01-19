@@ -23,37 +23,27 @@ namespace Resto_Backend.Utils
             };
         }
 
-        public async Task<string> UploadFileAsync(string localFilePath)
+        public async Task<string> UploadFileAsync(IFormFile file)
         {
             try
             {
-                if (string.IsNullOrEmpty(localFilePath) || !File.Exists(localFilePath))
-                    throw new ArgumentException("Invalid file path.");
-
-                // Use RawUploadParams for resource_type:auto
-                var uploadParams = new RawUploadParams
+                using (var stream = file.OpenReadStream())
                 {
-                    File = new FileDescription(localFilePath)
-                };
+                    var uploadParams = new ImageUploadParams
+                    {
+                        File = new FileDescription(file.FileName, stream),
+                        PublicId = Guid.NewGuid().ToString()
+                    };
 
-                var uploadResult = await _cloudinary.UploadAsync(uploadParams);
+                    var uploadResult = await _cloudinary.UploadAsync(uploadParams);
 
-                // Delete the local file after upload
-                File.Delete(localFilePath);
-
-                // Return the secure URL of the uploaded file
-                return uploadResult.SecureUrl?.ToString();
+                    return uploadResult.SecureUrl.ToString();
+                }
             }
             catch (Exception ex)
             {
-                // Handle error (e.g., log it)
-                Console.WriteLine($"Upload failed: {ex.Message}");
-
-                // Delete the local file if upload fails
-                if (File.Exists(localFilePath))
-                    File.Delete(localFilePath);
-
-                return null; // Return null if the upload fails
+                Console.WriteLine($"Image Upload Error: {ex.Message}");
+                return string.Empty;
             }
         }
 

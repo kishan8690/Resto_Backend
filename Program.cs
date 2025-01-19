@@ -4,8 +4,10 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 using Resto_Backend.Data;
-using Resto_Backend.Middleware;
+//using Resto_Backend.Middleware;
 using Resto_Backend.Utils;
 using System.Reflection;
 using System.Text;
@@ -14,7 +16,10 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 
+builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 // Add services to the container.
+
+
 builder.Services.AddControllers().
     AddFluentValidation(fv => fv.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
 builder.Services.AddControllers();
@@ -26,6 +31,16 @@ builder.Services.AddSingleton<TokenService>();
 builder.Services.AddScoped<CategoryRepository>();
 builder.Services.AddScoped<ChefReposetory>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll",
+        policy =>
+        {
+            policy.AllowAnyOrigin()
+                  .AllowAnyMethod()
+                  .AllowAnyHeader();
+        });
+});
 
 //JWT Authentication
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -45,6 +60,7 @@ options.TokenValidationParameters = new TokenValidationParameters
     });
 
 var app = builder.Build();
+app.UseCors("AllowAll");
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -54,7 +70,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseHttpsRedirection();
 app.UseAuthorization();
-
+//app.UseMiddleware<AuthMiddleware>();
 app.MapControllers();
 
 app.Run();
