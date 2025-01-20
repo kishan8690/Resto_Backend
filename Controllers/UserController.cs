@@ -70,7 +70,7 @@ namespace Resto_Backend.Controllers
         }
         #endregion
 
-        [HttpPost]
+       
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
@@ -98,7 +98,20 @@ namespace Resto_Backend.Controllers
                         SameSite = SameSiteMode.Strict, // Prevents cross-site request forgery (CSRF)
                         Expires = DateTime.UtcNow.AddHours(1) // Set cookie expiration
                     });
-
+                    HttpContext.Response.Cookies.Append("UserName", model.UserName, new CookieOptions
+                    {
+                        HttpOnly = true, // Prevents JavaScript from accessing the cookie
+                        Secure = true,   // Ensures the cookie is sent only over HTTPS
+                        SameSite = SameSiteMode.Strict, // Prevents cross-site request forgery (CSRF)
+                        Expires = DateTime.UtcNow.AddHours(1) // Set cookie expiration
+                    });
+                    HttpContext.Response.Cookies.Append("Password", model.Password, new CookieOptions
+                    {
+                        HttpOnly = true, // Prevents JavaScript from accessing the cookie
+                      //  Secure = true,   // Ensures the cookie is sent only over HTTPS
+                        SameSite = SameSiteMode.Strict, // Prevents cross-site request forgery (CSRF)
+                        Expires = DateTime.UtcNow.AddHours(1) // Set cookie expiration
+                    });
                     return Ok(new { Message = "Login successful!",Token = token  });
                 }
                 else

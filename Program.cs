@@ -7,6 +7,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Newtonsoft.Json;
 using Resto_Backend.Data;
+using Resto_Backend.Middleware;
+
 //using Resto_Backend.Middleware;
 using Resto_Backend.Utils;
 using System.Reflection;
@@ -70,7 +72,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseHttpsRedirection();
 app.UseAuthorization();
-//app.UseMiddleware<AuthMiddleware>();
+app.UseMiddleware<AuthMiddleware>();
 app.MapControllers();
 
 app.Run();

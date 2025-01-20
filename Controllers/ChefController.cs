@@ -36,7 +36,7 @@ namespace Resto_Backend.Controllers
             return Ok(chef);
         }
         [HttpPost]
-        public async Task<IActionResult> AddChef([FromBody] ChefModel chef)
+        public async Task<IActionResult> AddChef([FromForm] ChefModel chef)
         {
             if (chef == null)
             {
@@ -50,7 +50,7 @@ namespace Resto_Backend.Controllers
             return StatusCode(500, "An Error occurred while Inserting");
         }
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateChef([FromBody] ChefModel chef)
+        public async Task<IActionResult> UpdateChef([FromForm] ChefModel chef)
         {
             if (chef == null)
             {

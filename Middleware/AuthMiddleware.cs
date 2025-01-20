@@ -1,71 +1,69 @@
-﻿//using Microsoft.AspNetCore.Mvc.Infrastructure;
-//using Microsoft.IdentityModel.Tokens;
-//using Resto_Backend.Data;
-//using System.IdentityModel.Tokens.Jwt;
-//using System.Security.Claims;
-//using System.Text;
+﻿using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.IdentityModel.Tokens;
+using Resto_Backend.Data;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
-//namespace Resto_Backend.Middleware
-//{
-//    public class AuthMiddleware
-//    {
-//        private readonly RequestDelegate _next;
-//        private readonly string _secretKey;
-//        private readonly string _validIssuer;
-//        private readonly string _validAudience;
-
-//        public AuthMiddleware(RequestDelegate next, string secretKey, string validIssuer, string validAudience)
-//        {
-//            _next = next;
-//            _secretKey = secretKey;
-//            _validIssuer = validIssuer;
-//            _validAudience = validAudience;
-//        }
-
+namespace Resto_Backend.Middleware
+{
+    public class AuthMiddleware
+    {
         
-//            public async Task InvokeAsync(HttpContext context)
-//            {
-//                var token = context.Request.Headers["Authorization"].FirstOrDefault()?.Split(" ").Last();
+            private readonly RequestDelegate _next;
+            private readonly IConfiguration _configuration;
 
-//                if (token != null)
-//                {
-//                    try
-//                    {
-//                        var key = _configuration["Jwt:Key"];
-//                        var issuer = _configuration["Jwt:Issuer"];
-//                        var audience = _configuration["Jwt:Audience"];
+            public AuthMiddleware(RequestDelegate next, IConfiguration configuration)
+            {
+                _next = next;
+                _configuration = configuration;
+            }
 
-//                        var tokenHandler = new JwtSecurityTokenHandler();
-//                        var tokenValidationParameters = new TokenValidationParameters
-//                        {
-//                            ValidateIssuer = true,
-//                            ValidIssuer = issuer,
+            public async Task InvokeAsync(HttpContext context)
+            {
+                var token = context.Request.Cookies["AuthToken"]; // Get the token from the cookie
 
-//                            ValidateAudience = true,
-//                            ValidAudience = audience,
+                if (string.IsNullOrEmpty(token))
+                {
+                    // If no token is found, continue with the request
+                    await _next(context);
+                    return;
+                }
 
-//                            ValidateIssuerSigningKey = true,
-//                            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key)),
+                try
+                {
+                    var tokenHandler = new JwtSecurityTokenHandler();
+                    var jwtToken = tokenHandler.ReadJwtToken(token);
+                Console.WriteLine("Middleware halo");
+                    // Extract user information (like UserName) from the token claims
+                    var userName = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserName")?.Value;
 
-//                            ValidateLifetime = true,
-//                            ClockSkew = TimeSpan.Zero
-//                        };
+                    if (!string.IsNullOrEmpty(userName))
+                    {
+                        // Set the UserName in the cookie
+                        context.Response.Cookies.Append("UserName", userName, new CookieOptions
+                        {
+                            HttpOnly = true,  // Prevents JavaScript from accessing the cookie
+                            Secure = true,    // Ensures the cookie is sent only over HTTPS
+                            SameSite = SameSiteMode.Strict, // Prevents CSRF attacks
+                            Expires = DateTime.UtcNow.AddHours(1) // Set cookie expiration
+                        });
 
-//                        ClaimsPrincipal principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out SecurityToken validatedToken);
+                        // Set the user name in HttpContext, so it's accessible in controllers
+                        context.Items["UserName"] = userName;
+                    Console.WriteLine(context.Items["UserName"]);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    // Handle any errors related to token parsing or validation
+                    Console.WriteLine($"Token validation failed: {ex.Message}");
+                }
 
-//                        context.User = principal; // Attach the user to the context
-//                    }
-//                    catch (Exception ex)
-//                    {
-//                        Console.WriteLine($"Token validation failed: {ex.Message}");
-//                        context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-//                        await context.Response.WriteAsync("Invalid Token");
-//                        return;
-//                    }
-//                }
-
-//                await _next(context);
-//            }
-//        }
-//    }
+                // Continue processing the request
+                await _next(context);
+            }
+        
+    }
+}
 
