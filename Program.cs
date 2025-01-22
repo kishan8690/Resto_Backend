@@ -32,6 +32,7 @@ builder.Services.AddScoped<UserRepository>();
 builder.Services.AddSingleton<TokenService>();
 builder.Services.AddScoped<CategoryRepository>();
 builder.Services.AddScoped<ChefReposetory>();
+builder.Services.AddScoped<ItemRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddCors(options =>
 {
