@@ -48,6 +48,12 @@ namespace Resto_Backend.Controllers
         [HttpPost]
         public async Task<IActionResult> AddItem([FromForm] ItemModel item)
         {
+            Console.WriteLine("Item Name: " + item.ItemName);
+            Console.WriteLine("Description: " + item.ItemDescription);
+            Console.WriteLine("Price: " + item.ItemPrice);
+            Console.WriteLine("CategoryID: " + item.CategoryID);
+            Console.WriteLine("ChefID: " + item.ChefID);
+
             if (item == null)
             {
                 return BadRequest();
