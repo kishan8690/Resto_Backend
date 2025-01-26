@@ -16,7 +16,10 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+//session
+builder.Services.AddDistributedMemoryCache();
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddSession();
 
 builder.Configuration.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 // Add services to the container.
@@ -33,6 +36,7 @@ builder.Services.AddSingleton<TokenService>();
 builder.Services.AddScoped<CategoryRepository>();
 builder.Services.AddScoped<ChefReposetory>();
 builder.Services.AddScoped<ItemRepository>();
+builder.Services.AddScoped<BookingRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
 builder.Services.AddCors(options =>
 {

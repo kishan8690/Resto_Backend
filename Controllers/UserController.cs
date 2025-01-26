@@ -70,7 +70,19 @@ namespace Resto_Backend.Controllers
         }
         #endregion
 
+        [HttpGet("User/{username}")]
        
+        public async Task<IActionResult> GetUserByUsername(string username)
+        {
+            var user = userRepository.SelectUserByUserName(username);
+            Console.WriteLine(user);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
+        }
+
 
         [HttpPost("Login")]
         public async Task<IActionResult> Login([FromBody] LoginModel model)
@@ -112,6 +124,7 @@ namespace Resto_Backend.Controllers
                         SameSite = SameSiteMode.Strict, // Prevents cross-site request forgery (CSRF)
                         Expires = DateTime.UtcNow.AddHours(1) // Set cookie expiration
                     });
+                   
                     return Ok(new { Message = "Login successful!",Token = token  });
                 }
                 else
@@ -122,6 +135,7 @@ namespace Resto_Backend.Controllers
             catch (Exception ex)
             {
                 // Log the exception
+                Console.WriteLine($"Error: {ex.Message}");
                 return StatusCode(500, "An error occurred while processing your request.");
             }
         }
