@@ -74,6 +74,38 @@ namespace Resto_Backend.Data
             }
             return ItemList;
         }
+        public List<ItemModel> SearchItem(String ItemName)
+        {
+            List<ItemModel> ItemList = new List<ItemModel>();
+            using (SqlConnection sqlConnection = new SqlConnection(this._configuration.GetConnectionString("ConnectionString")))
+            {
+                SqlCommand sqlCommand = new SqlCommand("PR_Items_SearchByName", sqlConnection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                sqlCommand.Parameters.AddWithValue("@ItemName", ItemName);
+                sqlConnection.Open();
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+                while (reader.Read())
+                {
+                    ItemModel item = new ItemModel
+                    {
+                        ItemID = Convert.ToInt32(reader["ItemID"]),
+                        ItemName = reader["ItemName"].ToString(),
+                        ItemDescription = reader["Description"].ToString(),
+                        ItemPrice = Convert.ToDouble(reader["ItemPrice"]),
+                        CategoryID = Convert.ToInt32(reader["CategoryID"]),
+                        ChefName = reader["ChefName"].ToString(),
+                        CategoryName = reader["CategoryName"].ToString(),
+                        ItemImageUrl = reader["ImagePath"].ToString(),
+                        ChefID = Convert.ToInt32(reader["ChefID"]),
+
+                    };
+                    ItemList.Add(item);
+                }
+            }
+            return ItemList;
+        }
         public ItemModel SelectItemByID(int ItemID)
         {
             ItemModel item = new ItemModel();

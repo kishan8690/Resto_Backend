@@ -37,7 +37,9 @@ namespace Resto_Backend.Middleware
                 Console.WriteLine("Middleware halo");
                     // Extract user information (like UserName) from the token claims
                     var userName = jwtToken.Claims.FirstOrDefault(c => c.Type == "UserName")?.Value;
-
+                UserRepository user = new UserRepository(_configuration);
+                var User = user.SelectUserByUserName(userName);
+                var userID = User.UserID;
                     if (!string.IsNullOrEmpty(userName))
                     {
                         // Set the UserName in the cookie
@@ -48,11 +50,19 @@ namespace Resto_Backend.Middleware
                             SameSite = SameSiteMode.Strict, // Prevents CSRF attacks
                             Expires = DateTime.UtcNow.AddHours(1) // Set cookie expiration
                         });
-
-                        // Set the user name in HttpContext, so it's accessible in controllers
-                        context.Items["UserName"] = userName;
+                    context.Response.Cookies.Append("UserID", userID.ToString(), new CookieOptions
+                    {
+                        HttpOnly = true,  // Prevents JavaScript from accessing the cookie
+                        Secure = true,    // Ensures the cookie is sent only over HTTPS
+                        SameSite = SameSiteMode.Strict, // Prevents CSRF attacks
+                        Expires = DateTime.UtcNow.AddHours(1) // Set cookie expiration
+                    });
+                    // Set the user name in HttpContext, so it's accessible in controllers
+                    context.Items["UserName"] = userName;
+                    context.Items["UserID"] = userID;
                     Console.WriteLine(context.Items["UserName"]);
-                    }
+                    Console.WriteLine(context.Items["UserID"]);
+                }
                 }
                 catch (Exception ex)
                 {

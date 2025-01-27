@@ -35,6 +35,16 @@ namespace Resto_Backend.Controllers
             }
             return Ok(items);
         }
+        [HttpGet("SearchByName")]
+        public IActionResult GetItemByCategory(String ItemName)
+        {
+            var items = itemRepository.SearchItem(ItemName);
+            if (items == null)
+            {
+                return NotFound();
+            }
+            return Ok(items);
+        }
         [HttpGet("{id}")]
         public IActionResult GetItemByID(int id)
         {
