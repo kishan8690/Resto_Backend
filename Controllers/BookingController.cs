@@ -26,6 +26,16 @@ namespace Resto_Backend.Controllers
             }
             return Ok(bookings);
         }
+        [HttpGet("/ExplairedBooking")]
+        public IActionResult GetAllExpiredBooking()
+        {
+            var bookings = bookingRepository.SelectAllExpiredBooking();
+            if (bookings == null)
+            {
+                return NotFound();
+            }
+            return Ok(bookings);
+        }
         [HttpGet("/UserwiseBooking/{userID}")]
         public IActionResult GetAllBookingByUserWise(int userID)
         {

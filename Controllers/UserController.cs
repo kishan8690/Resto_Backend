@@ -70,6 +70,18 @@ namespace Resto_Backend.Controllers
         }
         #endregion
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var user = userRepository.SelectAllUsers();
+            Console.WriteLine(user);
+            if (user == null)
+            {
+                return NotFound();
+            }
+            return Ok(user);
+        }
+
         [HttpGet("User/{username}")]
        
         public async Task<IActionResult> GetUserByUsername(string username)

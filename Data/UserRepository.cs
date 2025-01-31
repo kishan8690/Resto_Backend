@@ -68,6 +68,37 @@ namespace Resto_Backend.Data
                 return user;
             }
         }
+        public IEnumerable<UserModel> SelectAllUsers()
+        {
+            List<UserModel> users = new List<UserModel>();
+            using (SqlConnection sqlConnection = new SqlConnection(this._configuration.GetConnectionString("ConnectionString")))
+            {
+                SqlCommand sqlCommand = new SqlCommand("PR_User_SelectAll", sqlConnection)
+                {
+                    CommandType = System.Data.CommandType.StoredProcedure
+                };
+                
+                sqlConnection.Open();
+                SqlDataReader reader = sqlCommand.ExecuteReader();
+                while (reader.Read())
+                {
+                    UserModel user = new UserModel
+                    {
+                        UserID = Convert.ToInt32(reader["UserID"]),
+                        UserName = reader["UserName"].ToString(),
+                        Password = reader["Password"].ToString(),
+                        Email = reader["Email"].ToString(),
+                        MobileNumber = reader["MobileNumber"].ToString(),
+                        Address = reader["Address"].ToString(),
+                        ProfileImageUrl = reader["ProfileImage"].ToString(),
+                        IsAdmin = Convert.ToInt32(reader["IsAdmin"]),
+                    };
+                    users.Add(user);
+                }
+                return users;
+            }
+
+        }
         public UserModel SelectUserByUserName(string userName)
         {
             UserModel user = null;
