@@ -2,6 +2,8 @@
 using Resto_Backend.Models;
 using System.Net.Mail;
 using System.Net;
+using Resto_Backend.Utils;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace Resto_Backend.Data
 {
@@ -169,10 +171,10 @@ namespace Resto_Backend.Data
                 {
                     // Fetch user email (assuming you have a method for this)
                     string userEmail = GetUserEmail(bookingStatus.BookingID, conn);
-
+                    MailService mailService = new MailService();
                     if (!string.IsNullOrEmpty(userEmail))
                     {
-                        SendEmailNotification(userEmail, bookingStatus.BookingStatus);
+                        mailService.SendEmailNotification(userEmail, "Booking Status Update", $"your booking status has been updated to: {bookingStatus.BookingStatus}");
                     }
 
                     return true;
@@ -196,31 +198,7 @@ namespace Resto_Backend.Data
             return email;
         }
         // Method to send email
-        private void SendEmailNotification(string toEmail, string bookingStatus)
-        {
-            try
-            {
-                MailMessage mail = new MailMessage();
-                mail.From = new MailAddress("amarrestaurant02@gmail.com"); // Your email
-                mail.To.Add(toEmail);
-                mail.Subject = "Booking Status Update";
-                mail.Body = $"Dear {toEmail}, your booking status has been updated to:{bookingStatus}.";
-
-                SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587)
-                {
-                    Credentials = new NetworkCredential("amarrestaurant02@gmail.com", "siru vdoc tjdx jwbf"),
-                    EnableSsl = true,
-                    DeliveryMethod = SmtpDeliveryMethod.Network,
-                    UseDefaultCredentials = false // Ensure this is false!
-                };
-
-                smtp.Send(mail);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("Email Error: " + ex.Message);
-            }
-        }
+        
         public bool DeleteBooking(int bookingId)
         {
             using (SqlConnection conn = new SqlConnection(this._configuration.GetConnectionString("ConnectionString")))
