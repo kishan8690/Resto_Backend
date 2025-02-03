@@ -132,7 +132,7 @@ namespace Resto_Backend.Data
                 sqlCommand.Parameters.AddWithValue("@BookingDate", booking.BookingDate);
                 sqlCommand.Parameters.AddWithValue("@UserID", booking.UserID);
                 sqlCommand.Parameters.AddWithValue("@NumberOfGuests", booking.NumberOfPerson);
-                sqlCommand.Parameters.AddWithValue("@BookingStatus", "Pendding");
+                sqlCommand.Parameters.AddWithValue("@BookingStatus", "Pending");
                 conn.Open();
                 int rowAffected = sqlCommand.ExecuteNonQuery();
                 return rowAffected > 0;
@@ -155,7 +155,7 @@ namespace Resto_Backend.Data
                 return rowAffected > 0;
             }
         }
-        public bool UpdateStatus(BookingStatusModel bookingStatus)
+        public bool UpdateStatus(BookingStatusModel bookingStatus,DateTime dateTime)
         {
             using (SqlConnection conn = new SqlConnection(this._configuration.GetConnectionString("ConnectionString")))
             {
@@ -174,7 +174,7 @@ namespace Resto_Backend.Data
                     MailService mailService = new MailService();
                     if (!string.IsNullOrEmpty(userEmail))
                     {
-                        mailService.SendEmailNotification(userEmail, "Booking Status Update", $"your booking status has been updated to: {bookingStatus.BookingStatus}");
+                        mailService.SendEmailNotification(userEmail, $"Booking Status Update for {dateTime}", $"your booking status has been updated to: {bookingStatus.BookingStatus}");
                     }
 
                     return true;

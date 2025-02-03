@@ -39,6 +39,8 @@ builder.Services.AddScoped<QueryReposetory>();
 builder.Services.AddScoped<ItemRepository>();
 builder.Services.AddScoped<BookingRepository>();
 builder.Services.AddScoped<IAuthRepository, AuthRepository>();
+builder.Services.AddScoped<IDashboardRepository, DashboardRepository>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",

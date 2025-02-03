@@ -91,8 +91,9 @@ namespace Resto_Backend.Controllers
             {
                 return BadRequest();
             }
-
-            bool isUpdate = bookingRepository.UpdateStatus(booking);
+            var mybooking = bookingRepository.SelectBookingByPk(booking.BookingID);
+            DateTime dateTime = mybooking.BookingDate;
+            bool isUpdate = bookingRepository.UpdateStatus(booking,dateTime);
             if (isUpdate)
             {
                 return Ok(new { Message = "Booking Status is Updated Successfully!" });
