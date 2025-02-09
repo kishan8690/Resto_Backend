@@ -74,11 +74,13 @@ namespace Resto_Backend.Controllers
             }
             return StatusCode(500, "An Error occurred while Deleting");
         }
-        [HttpPost("SendResponse")]
-        public IActionResult SendResponse(MailResponse mailResponse)
+        [HttpPut("SendResponse")]
+        public IActionResult SendResponse(MailResponse mailResponse,int id)
         {
+            var query = queryReposetory.SelectQueryByPk(id);
+
             MailService mailService = new MailService();
-            mailService.SendEmailNotification(mailResponse.ToMail, mailResponse.Subject, mailResponse.Message);
+            mailService.SendEmailNotification(mailResponse.ToMail,mailResponse.Subject, mailResponse.Message);
             return Ok(mailResponse);
         }
     }
