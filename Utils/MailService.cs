@@ -17,7 +17,7 @@ namespace Resto_Backend.Utils
 
                 SmtpClient smtp = new SmtpClient("smtp.gmail.com", 587)
                 {
-                    Credentials = new NetworkCredential("amarrestaurant02@gmail.com", "siru vdoc tjdx jwbf"),
+                    Credentials = new NetworkCredential("amarrestaurant02@gmail.com", ""),
                     EnableSsl = true,
                     DeliveryMethod = SmtpDeliveryMethod.Network,
                     UseDefaultCredentials = false // Ensure this is false!
